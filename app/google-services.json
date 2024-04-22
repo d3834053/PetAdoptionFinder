@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "976778483349",
+    "project_id": "pet-adopton-finder",
+    "storage_bucket": "pet-adopton-finder.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:976778483349:android:ae9606aaac7a6e7b192d9c",
+        "android_client_info": {
+          "package_name": "uk.ac.tees.mad.d3834053"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "976778483349-6peo0flc3drmmfsab9bvphgbar1fs2mf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "uk.ac.tees.mad.d3834053",
+            "certificate_hash": "de8ebde9afa24f7a888779a3097994b92c85c1bd"
+          }
+        },
+        {
+          "client_id": "976778483349-gkesqf8b7hf8b9ggu9m148ie820s05ls.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1bmK_mwPyN39nCRw_CzYXwcnH0Mjc6h0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "976778483349-gkesqf8b7hf8b9ggu9m148ie820s05ls.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
