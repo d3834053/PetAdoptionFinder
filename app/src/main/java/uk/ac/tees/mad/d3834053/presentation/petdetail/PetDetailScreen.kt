@@ -51,7 +51,7 @@ object PetDetailDestination : NavigationDestination {
 fun PetDetailScreen(
     onNavigateBack: () -> Unit
 ) {
-    val item = itemsList[1]
+    val item = itemsList[2]
     val screenHeight = LocalConfiguration.current.screenHeightDp
     Box(
         modifier = Modifier
@@ -93,7 +93,7 @@ fun PetDetailScreen(
                 .fillMaxWidth()
                 .background(Color.White)
                 .align(Alignment.BottomCenter)
-                .padding(16.dp)
+                .padding(24.dp)
 
         ) {
 

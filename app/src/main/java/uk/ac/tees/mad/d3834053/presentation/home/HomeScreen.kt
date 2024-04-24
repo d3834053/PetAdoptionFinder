@@ -23,9 +23,12 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -41,13 +44,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import uk.ac.tees.mad.d3834053.BottomNavBar
 import uk.ac.tees.mad.d3834053.NavigationDestination
 import uk.ac.tees.mad.d3834053.R
+import uk.ac.tees.mad.d3834053.bottomNavigationItems
 import uk.ac.tees.mad.d3834053.presentation.constants.Categories
 import uk.ac.tees.mad.d3834053.presentation.constants.Items
 import uk.ac.tees.mad.d3834053.presentation.constants.itemsList
+import uk.ac.tees.mad.d3834053.ui.theme.primaryYellow
 
 object HomeDestination : NavigationDestination {
     override val route = "home"
@@ -56,7 +63,8 @@ object HomeDestination : NavigationDestination {
 @Composable
 fun HomeScreen(
     onNavigateToLogin: () -> Unit,
-    onItemClick: () -> Unit
+    onItemClick: () -> Unit,
+    navController: NavHostController
 ) {
     val selectedItemIndex = remember {
         mutableIntStateOf(0)
@@ -72,96 +80,103 @@ fun HomeScreen(
     )
 
 //FFA2A2A2
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "Discover",
-                    style = MaterialTheme.typography.headlineMedium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.size(320.dp, 40.dp)
-                )
-                IconButton(onClick = { }) {
-                    Icon(imageVector = Icons.Filled.Person, contentDescription = "")
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(8.dp)
-                    .clip(shape = RoundedCornerShape(30.dp))
-                    .background(
-                        Color(
-                            0xFFCCCCCC
-                        )
-                    )
-            ) {
+    Scaffold(
+        bottomBar = {
+            BottomNavBar(navController = navController)
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
+            Column {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(),
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(text = "Search Pets", style = MaterialTheme.typography.bodyMedium)
-                    Spacer(modifier = Modifier.size(20.dp))
-                    Icon(imageVector = Icons.Filled.Search, contentDescription = "Search Box")
-                }
-            }
-
-            Spacer(modifier = Modifier.size(30.dp))
-
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                itemsIndexed(categories) { index, item ->
-                    CategoryCard(modifier = Modifier
-                        .size(80.dp, 120.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            if (selectedItemIndex.intValue == index) Color(0xFFFFAE00)
-                            else Color(0xFFBBBBBB)
-                        )
-                        .clickable {
-                            selectedItemIndex.intValue = index
-                            selectedCategory.value = item.title
-                        }
-                        .padding(horizontal = 12.dp, vertical = 6.dp), item = item)
-                }
-            }
-
-            Spacer(modifier = Modifier.size(30.dp))
-
-            LazyColumn {
-                itemsIndexed(itemsList) { _, item ->
-                    if (item.category == selectedCategory.value) {
-                        PetsCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(250.dp)
-                                .padding(10.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .clickable {
-                                    onItemClick()
-                                }, items = item
-                        )
+                    Text(
+                        text = "Discover",
+                        style = MaterialTheme.typography.headlineMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.size(320.dp, 40.dp)
+                    )
+                    IconButton(onClick = { }) {
+                        Icon(imageVector = Icons.Filled.Person, contentDescription = "")
                     }
                 }
-            }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .padding(8.dp)
+                        .clip(shape = RoundedCornerShape(30.dp))
+                        .background(
+                            Color(
+                                0xFFCCCCCC
+                            )
+                        )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "Search Pets", style = MaterialTheme.typography.bodyMedium)
+                        Spacer(modifier = Modifier.size(20.dp))
+                        Icon(imageVector = Icons.Filled.Search, contentDescription = "Search Box")
+                    }
+                }
 
+                Spacer(modifier = Modifier.size(30.dp))
+
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    itemsIndexed(categories) { index, item ->
+                        CategoryCard(modifier = Modifier
+                            .size(80.dp, 120.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                if (selectedItemIndex.intValue == index) Color(0xFFFFAE00)
+                                else Color(0xFFBBBBBB)
+                            )
+                            .clickable {
+                                selectedItemIndex.intValue = index
+                                selectedCategory.value = item.title
+                            }
+                            .padding(horizontal = 12.dp, vertical = 6.dp), item = item)
+                    }
+                }
+
+                Spacer(modifier = Modifier.size(30.dp))
+
+                LazyColumn {
+                    itemsIndexed(itemsList) { _, item ->
+                        if (item.category == selectedCategory.value) {
+                            PetsCard(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(250.dp)
+                                    .padding(10.dp)
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .clickable {
+                                        onItemClick()
+                                    }, items = item
+                            )
+                        }
+                    }
+                }
+
+            }
         }
     }
 }
