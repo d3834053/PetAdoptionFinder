@@ -88,6 +88,7 @@ dependencies {
 
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.47")
+    implementation(libs.play.services.maps)
     ksp("com.google.dagger:hilt-compiler:2.47")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
@@ -95,6 +96,10 @@ dependencies {
 
     //Coil
     implementation("io.coil-kt:coil-compose:2.6.0")
+
+    implementation ("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
+    implementation ("com.google.maps.android:maps-compose:4.3.3")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

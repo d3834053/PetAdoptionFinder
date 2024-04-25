@@ -8,13 +8,21 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.GoogleMap
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 import uk.ac.tees.mad.d3834053.BottomNavBar
 import uk.ac.tees.mad.d3834053.NavigationDestination
-import uk.ac.tees.mad.d3834053.domain.shelters
+import uk.ac.tees.mad.d3834053.domain.Shelter
 
 object ShelterDestination : NavigationDestination {
     override val route = "shelter"
@@ -22,14 +30,16 @@ object ShelterDestination : NavigationDestination {
 
 @Composable
 fun ShelterScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: ShelterViewModel = hiltViewModel()
 ) {
 
-    val shelterViewModel: ShelterViewModel = hiltViewModel()
+    val shelters by viewModel.shelters.collectAsState()
 
-    LaunchedEffect(Unit) {
-        shelterViewModel.addSheltersToFirestore(shelters)
+    LaunchedEffect(true) {
+        viewModel.getShelters()
     }
+
     Scaffold(
         bottomBar = {
             BottomNavBar(navController = navController)
@@ -41,7 +51,28 @@ fun ShelterScreen(
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            Text(text = "Shelter")
+            MapScreen(shelters = shelters)
+        }
+    }
+}
+
+@Composable
+fun MapScreen(shelters: List<Shelter>) {
+    val ukLocation = LatLng(53.4808, -2.2426) // Default location
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(ukLocation, 8f)
+    }
+
+    GoogleMap(
+        modifier = Modifier.fillMaxSize(),
+        cameraPositionState = cameraPositionState
+    ) {
+        shelters.forEach { shelter ->
+            Marker(
+                state = MarkerState(position = LatLng(shelter.geopoint.latitude, shelter.geopoint.longitude)),
+                title = shelter.name,
+                snippet = shelter.description
+            )
         }
     }
 }
