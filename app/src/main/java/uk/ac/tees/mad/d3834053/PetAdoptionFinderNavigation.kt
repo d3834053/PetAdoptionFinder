@@ -30,6 +30,8 @@ import uk.ac.tees.mad.d3834053.presentation.onboarding.OnboardScreen
 import uk.ac.tees.mad.d3834053.presentation.onboarding.OnboardingDestination
 import uk.ac.tees.mad.d3834053.presentation.petdetail.PetDetailDestination
 import uk.ac.tees.mad.d3834053.presentation.petdetail.PetDetailScreen
+import uk.ac.tees.mad.d3834053.presentation.profile.EditProfile
+import uk.ac.tees.mad.d3834053.presentation.profile.EditProfileDestination
 import uk.ac.tees.mad.d3834053.presentation.profile.ProfileDestination
 import uk.ac.tees.mad.d3834053.presentation.profile.ProfileScreen
 import uk.ac.tees.mad.d3834053.ui.theme.primaryYellow
@@ -103,6 +105,9 @@ fun PetAdoptionFinderNavigation() {
             ProfileScreen(
                 navController = navController
             )
+        }
+        composable(EditProfileDestination.route) {
+            EditProfile(onFinishEditing = { navController.navigateUp() })
         }
     }
 }

@@ -9,7 +9,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import uk.ac.tees.mad.d3834053.domain.Shelter
-import uk.ac.tees.mad.d3834053.domain.shelters
 import javax.inject.Inject
 
 @HiltViewModel
