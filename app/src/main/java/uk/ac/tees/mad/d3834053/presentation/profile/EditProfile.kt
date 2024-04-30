@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.CameraEnhance
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.rounded.AddAPhoto
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -84,10 +85,10 @@ fun EditProfile(
     onFinishEditing: () -> Unit,
     profileViewModel: ProfileViewModel = hiltViewModel()
 ) {
-    val currentUserState by profileViewModel.getUserState.collectAsState(initial = null)
+    val currentUserState by profileViewModel.userStateFlow.collectAsState(initial = null)
 
-    val editState by profileViewModel.uiState.collectAsState()
-    val modifyUserState by profileViewModel.updateUserState.collectAsState(initial = null)
+    val editState by profileViewModel.profileUIState.collectAsState()
+    val modifyUserState by profileViewModel.userUpdateFlow.collectAsState(initial = null)
     val applicationContext = LocalContext.current
     val focusManager = LocalFocusManager.current
     val coroutineScope = rememberCoroutineScope()
@@ -97,17 +98,17 @@ fun EditProfile(
     )
 
     LaunchedEffect(Unit) {
-        profileViewModel.getUserInformation()
+        profileViewModel.fetchUserDetails()
     }
     LaunchedEffect(currentUserState) {
         currentUserState?.let {
             val item = it
             launch(Dispatchers.IO) {
-                profileViewModel.updateUserDataState(
-                    UserData(
+                profileViewModel.modifyUserProfileData(
+                    UserProfile(
                         name = item.name,
                         email = item.email,
-                        image = getImageFromUrl(item.image ?: ""),
+                        image = fetchImageFromURL(item.image ?: ""),
                         address = item.address,
                     )
                 )
@@ -122,29 +123,36 @@ fun EditProfile(
     val galleryImagePicker =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
             selectedImageUri = uri
-            uri?.let { profileViewModel.processSelectedImage(it, applicationContext) }
+            uri?.let { profileViewModel.handleImageSelection(it, applicationContext) }
         }
 
     val cameraImageCapture =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
-            bitmap?.let { profileViewModel.processCapturedImage(it) }
+            bitmap?.let { profileViewModel.handleImageCapture(it) }
         }
 
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
     val mainViewModel: ApplicationViewModel = hiltViewModel()
-
+    val isGpsEnabled = remember { mutableStateOf(false) }
+    val locationRepo = LocationRepository(
+        context = applicationContext, activity = (applicationContext as Activity)
+    )
+    LaunchedEffect(key1 = true) {
+        isGpsEnabled.value = locationRepo.gpsStatus.first()
+    }
 
     Column {
         Row(
             Modifier
                 .fillMaxWidth()
+                .height(50.dp)
                 .background(primaryYellow), verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onFinishEditing) {
                 Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null)
             }
             Row(Modifier.weight(1f), horizontalArrangement = Arrangement.Center) {
-                Text(text = "Profile Editing", fontSize = 19.sp, fontWeight = FontWeight.Medium)
+                Text(text = "Edit Profile", fontSize = 19.sp, fontWeight = FontWeight.Medium)
             }
         }
 
@@ -180,9 +188,12 @@ fun EditProfile(
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
-        UploadPhotoButton(
-            onClick = { showBottomSheet = true }, image = editState.image
-        )
+        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+
+            UploadPhotoButton(
+                onClick = { showBottomSheet = true }, image = editState.image
+            )
+        }
         Spacer(modifier = Modifier.height(24.dp))
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -191,19 +202,29 @@ fun EditProfile(
             TextFieldWithLabel(
                 label = "Name",
                 text = editState.name,
-                onTextChange = { profileViewModel.updateUserDataState(editState.copy(name = it)) },
+                onTextChange = { profileViewModel.modifyUserProfileData(editState.copy(name = it)) },
                 focusManager = focusManager
             )
             LocationInputField(
                 label = "Location",
                 text = editState.address,
-                onTextChange = { profileViewModel.updateUserDataState(editState.copy(address = it)) },
+                onTextChange = { profileViewModel.modifyUserProfileData(editState.copy(address = it)) },
                 focusManager = focusManager,
-                locationRepo = LocationRepository(
-                    context = applicationContext, activity = (applicationContext as Activity)
-                ),
-                mainViewModel = mainViewModel
+                locationRepo = locationRepo,
+                mainViewModel = mainViewModel,
+                isGpsEnabled = isGpsEnabled.value
             )
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = {
+                    profileViewModel.submitProfileUpdate(context = applicationContext)
+                    onFinishEditing.invoke()
+                }, modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                Text(text = "Update")
+            }
         }
     }
 }
@@ -243,18 +264,15 @@ fun LocationInputField(
     onTextChange: (String) -> Unit,
     focusManager: FocusManager,
     locationRepo: LocationRepository,
-    mainViewModel: ApplicationViewModel
+    mainViewModel: ApplicationViewModel,
+    isGpsEnabled: Boolean
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val locationPermission =
         rememberPermissionState(permission = Manifest.permission.ACCESS_FINE_LOCATION)
 
-    val isGpsEnabled = remember { mutableStateOf(false) }
 
-    LaunchedEffect(key1 = true) {
-        isGpsEnabled.value = locationRepo.gpsStatus.first()
-    }
 
     TextFieldWithLabel(label = label,
         text = text,
@@ -263,7 +281,7 @@ fun LocationInputField(
         endIcon = {
             IconButton(onClick = {
                 if (locationPermission.status.isGranted) {
-                    if (isGpsEnabled.value) {
+                    if (isGpsEnabled) {
                         // Retrieve and update location
                         coroutineScope.launch {
                             mainViewModel.locationFlow.collectLatest { location ->

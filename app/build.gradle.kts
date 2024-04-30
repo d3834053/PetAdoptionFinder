@@ -98,8 +98,17 @@ dependencies {
     //Coil
     implementation("io.coil-kt:coil-compose:2.6.0")
 
+    //Accompanist
     implementation ("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
+
+    //Maps
     implementation ("com.google.maps.android:maps-compose:4.3.3")
+
+    // Room
+    implementation ("androidx.room:room-runtime:2.6.1")
+    ksp ("androidx.room:room-compiler:2.6.1")
+    implementation ("androidx.room:room-ktx:2.6.1")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -1,11 +1,14 @@
 package uk.ac.tees.mad.d3834053.presentation.auth.registration
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import uk.ac.tees.mad.d3834053.R
 import uk.ac.tees.mad.d3834053.presentation.auth.repository.AuthRepository
 import uk.ac.tees.mad.d3834053.presentation.common.state.ErrorState
 import uk.ac.tees.mad.d3834053.presentation.constants.GlobalConstants
@@ -20,8 +23,9 @@ import uk.ac.tees.mad.d3834053.presentation.state.registration.passwordMismatchE
 
 class RegistrationViewModel : ViewModel() {
 
-    var registrationState = mutableStateOf(RegistrationState())
-        private set
+    private val _registrationState = MutableStateFlow(RegistrationState())
+    val registrationState = _registrationState.asStateFlow()
+
     var repository = AuthRepository()
 
     /**
@@ -32,9 +36,9 @@ class RegistrationViewModel : ViewModel() {
 
             // Email id changed event
             is RegistrationUiEvent.EmailChanged -> {
-                registrationState.value = registrationState.value.copy(
+                _registrationState.value = _registrationState.value.copy(
                     emailId = registrationUiEvent.inputValue,
-                    errorState = registrationState.value.errorState.copy(
+                    errorState = _registrationState.value.errorState.copy(
                         emailIdErrorState = if (registrationUiEvent.inputValue.trim().isEmpty()) {
                             // Email id empty state
                             emailEmptyErrorState
@@ -49,9 +53,9 @@ class RegistrationViewModel : ViewModel() {
 
             // Mobile Number changed event
             is RegistrationUiEvent.MobileNumberChanged -> {
-                registrationState.value = registrationState.value.copy(
+                _registrationState.value = _registrationState.value.copy(
                     mobileNumber = registrationUiEvent.inputValue,
-                    errorState = registrationState.value.errorState.copy(
+                    errorState = _registrationState.value.errorState.copy(
                         mobileNumberErrorState = if (registrationUiEvent.inputValue.trim()
                                 .isEmpty()
                         ) {
@@ -68,9 +72,9 @@ class RegistrationViewModel : ViewModel() {
 
             // Password changed event
             is RegistrationUiEvent.PasswordChanged -> {
-                registrationState.value = registrationState.value.copy(
+                _registrationState.value = _registrationState.value.copy(
                     password = registrationUiEvent.inputValue,
-                    errorState = registrationState.value.errorState.copy(
+                    errorState = _registrationState.value.errorState.copy(
                         passwordErrorState = if (registrationUiEvent.inputValue.trim().isEmpty()) {
                             // Password Empty state
                             passwordEmptyErrorState
@@ -85,9 +89,9 @@ class RegistrationViewModel : ViewModel() {
 
             // Confirm Password changed event
             is RegistrationUiEvent.ConfirmPasswordChanged -> {
-                registrationState.value = registrationState.value.copy(
+                _registrationState.value = _registrationState.value.copy(
                     confirmPassword = registrationUiEvent.inputValue,
-                    errorState = registrationState.value.errorState.copy(
+                    errorState = _registrationState.value.errorState.copy(
                         confirmPasswordErrorState = when {
 
                             // Empty state of confirm password
@@ -96,7 +100,7 @@ class RegistrationViewModel : ViewModel() {
                             }
 
                             // Password is different than the confirm password
-                            registrationState.value.password.trim() != registrationUiEvent.inputValue -> {
+                            _registrationState.value.password.trim() != registrationUiEvent.inputValue -> {
                                 passwordMismatchErrorState
                             }
 
@@ -111,15 +115,19 @@ class RegistrationViewModel : ViewModel() {
             // Submit Registration event
             is RegistrationUiEvent.Submit -> {
                 val inputsValidated = validateInputs()
+                Log.d("VLAID", "${inputsValidated} INPU")
                 if (inputsValidated) {
-                    // TODO Trigger registration in authentication flow
-                    registrationState.value =
-                        registrationState.value.copy(isRegistrationSuccessful = true)
+//                    _registrationState.value =
+//                        _registrationState.value.copy(isRegistrationSuccessful = true)
                     SignupUser(GlobalConstants.context!!)
+                } else {
+//                    _registrationState.value =
+//                        _registrationState.value.copy(isRegistrationSuccessful = false)
                 }
             }
         }
     }
+
     private fun SignupUser(context: Context) = viewModelScope.launch {
         try {
 
@@ -128,8 +136,8 @@ class RegistrationViewModel : ViewModel() {
             }
 
             repository.createUser(
-                registrationState.value.emailId,
-                registrationState.value.password
+                _registrationState.value.emailId,
+                _registrationState.value.password
             ) { isSuccessful ->
                 if (isSuccessful) {
                     Toast.makeText(
@@ -137,24 +145,23 @@ class RegistrationViewModel : ViewModel() {
                         "success Login",
                         Toast.LENGTH_SHORT
                     ).show()
-                    registrationState.value.isRegistrationSuccessful =true
+                    _registrationState.value =
+                        _registrationState.value.copy(isRegistrationSuccessful = true)
+
                 } else {
                     Toast.makeText(
                         context,
                         "Failed Login",
                         Toast.LENGTH_SHORT
                     ).show()
-                    registrationState.value.isRegistrationSuccessful =false
+                    _registrationState.value =
+                        _registrationState.value.copy(isRegistrationSuccessful = false)
                 }
 
             }
-
-
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
-
     }
 
     /**
@@ -164,16 +171,31 @@ class RegistrationViewModel : ViewModel() {
      * @return false -> inputs are invalid
      */
     private fun validateInputs(): Boolean {
-        val emailString = registrationState.value.emailId.trim()
-        val mobileNumberString = registrationState.value.mobileNumber.trim()
-        val passwordString = registrationState.value.password.trim()
-        val confirmPasswordString = registrationState.value.confirmPassword.trim()
+        val emailString = _registrationState.value.emailId.trim()
+        val mobileNumberString = _registrationState.value.mobileNumber.trim()
+        val passwordString = _registrationState.value.password.trim()
+        val confirmPasswordString = _registrationState.value.confirmPassword.trim()
+
+        // Regex pattern for validating email
+        val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
 
         return when {
+            // Check if email matches pattern
+            !emailString.matches(emailPattern.toRegex()) -> {
+                _registrationState.value = _registrationState.value.copy(
+                    errorState = RegistrationErrorState(
+                        emailIdErrorState = ErrorState(
+                            hasError = true,
+                            errorMessageStringResource = R.string.invalid_email_format
+                        )
+                    )
+                )
+                false
+            }
 
             // Email empty
             emailString.isEmpty() -> {
-                registrationState.value = registrationState.value.copy(
+                _registrationState.value = _registrationState.value.copy(
                     errorState = RegistrationErrorState(
                         emailIdErrorState = emailEmptyErrorState
                     )
@@ -183,7 +205,7 @@ class RegistrationViewModel : ViewModel() {
 
             //Mobile Number Empty
             mobileNumberString.isEmpty() -> {
-                registrationState.value = registrationState.value.copy(
+                _registrationState.value = _registrationState.value.copy(
                     errorState = RegistrationErrorState(
                         mobileNumberErrorState = mobileNumberEmptyErrorState
                     )
@@ -193,7 +215,7 @@ class RegistrationViewModel : ViewModel() {
 
             //Password Empty
             passwordString.isEmpty() -> {
-                registrationState.value = registrationState.value.copy(
+                _registrationState.value = _registrationState.value.copy(
                     errorState = RegistrationErrorState(
                         passwordErrorState = passwordEmptyErrorState
                     )
@@ -203,7 +225,7 @@ class RegistrationViewModel : ViewModel() {
 
             //Confirm Password Empty
             confirmPasswordString.isEmpty() -> {
-                registrationState.value = registrationState.value.copy(
+                _registrationState.value = _registrationState.value.copy(
                     errorState = RegistrationErrorState(
                         confirmPasswordErrorState = confirmPasswordEmptyErrorState
                     )
@@ -213,7 +235,7 @@ class RegistrationViewModel : ViewModel() {
 
             // Password and Confirm Password are different
             passwordString != confirmPasswordString -> {
-                registrationState.value = registrationState.value.copy(
+                _registrationState.value = _registrationState.value.copy(
                     errorState = RegistrationErrorState(
                         confirmPasswordErrorState = passwordMismatchErrorState
                     )
@@ -224,8 +246,8 @@ class RegistrationViewModel : ViewModel() {
             // No errors
             else -> {
                 // Set default error state
-                registrationState.value =
-                    registrationState.value.copy(errorState = RegistrationErrorState())
+                _registrationState.value =
+                    _registrationState.value.copy(errorState = RegistrationErrorState())
                 true
             }
         }

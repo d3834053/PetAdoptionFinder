@@ -1,7 +1,15 @@
 package uk.ac.tees.mad.d3834053.presentation.petdetail
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.telephony.SmsManager
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +33,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,54 +46,58 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import uk.ac.tees.mad.d3834053.NavigationDestination
 import uk.ac.tees.mad.d3834053.R
-import uk.ac.tees.mad.d3834053.presentation.constants.itemsList
 import uk.ac.tees.mad.d3834053.ui.theme.primaryYellow
 
 object PetDetailDestination : NavigationDestination {
     override val route = "petDetail"
+    val petIdArg = "petId"
+    val routeWithArg = "$route/{$petIdArg}"
 }
 
 @Composable
 fun PetDetailScreen(
     onNavigateBack: () -> Unit
 ) {
-    val item = itemsList[2]
+    val petDetailViewModel: PetDetailViewModel = hiltViewModel()
+    val item by petDetailViewModel.pet.collectAsState()
     val screenHeight = LocalConfiguration.current.screenHeightDp
+    val context = LocalContext.current
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
         Box(modifier = Modifier.height((screenHeight / 2).dp)) {
-            if (item != null) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current).crossfade(true)
-                        .data(item.imageRes)
-                        .build(),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxWidth(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
+            if (item.image.isEmpty()) {
                 Image(
                     imageVector = Icons.Default.Image,
                     contentDescription = null,
                     modifier = Modifier.size(100.dp)
+                )
+            } else {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current).crossfade(true)
+                        .data(item.image)
+                        .build(),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.Crop
                 )
             }
             IconButton(
                 onClick = onNavigateBack,
                 modifier = Modifier
                     .padding(16.dp),
-                colors = IconButtonDefaults.iconButtonColors(Color.White.copy(0.5f))
+                colors = IconButtonDefaults.iconButtonColors(Color.White.copy(0.7f))
             ) {
                 Icon(
                     imageVector = Icons.Default.ChevronLeft,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = Color.Black,
                     modifier = Modifier.size(35.dp)
                 )
             }
@@ -109,11 +123,19 @@ fun PetDetailScreen(
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(text = "Age", fontSize = 16.sp)
-                    Text(text = "${item.age} years", fontSize = 20.sp, fontWeight = FontWeight.Medium)
+                    Text(
+                        text = "${item.age} years",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(text = "Weight", fontSize = 16.sp)
-                    Text(text = "${item.weight} kg", fontSize = 20.sp, fontWeight = FontWeight.Medium)
+                    Text(
+                        text = "${item.weight} kg",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(20.dp))
@@ -183,6 +205,9 @@ fun PetDetailScreen(
                                 modifier = Modifier
                                     .size(60.dp)
                                     .clip(CircleShape)
+                                    .clickable {
+                                        context.dial(item.contactPerson.phone)
+                                    }
                                     .background(Color.Blue),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -196,7 +221,13 @@ fun PetDetailScreen(
                                 modifier = Modifier
                                     .size(60.dp)
                                     .clip(CircleShape)
-                                    .background(primaryYellow),
+                                    .background(primaryYellow)
+                                    .clickable {
+                                        context.sendMail(
+                                            item.contactPerson.email,
+                                            "Want to pet ${item.name}"
+                                        )
+                                    },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -212,3 +243,30 @@ fun PetDetailScreen(
         }
     }
 }
+
+fun Context.dial(phone: String) {
+    try {
+        val intent = Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", phone, null))
+        startActivity(intent)
+    } catch (t: Throwable) {
+        Log.d("Dial Error ERROR", t.message.toString())
+    }
+}
+
+fun Context.sendMail(to: String, subject: String) {
+    try {
+        val intent = Intent(Intent.ACTION_VIEW)
+        val data = Uri.parse("mailto:${to}?subject=$subject&body=")
+        intent.setData(data)
+        startActivity(intent)
+    } catch (e: ActivityNotFoundException) {
+        this.showToast("No email app")
+    } catch (t: Throwable) {
+        Log.d("Message ERROR", t.message.toString())
+    }
+}
+
+fun Context.showToast(text: String) {
+    Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
+}
+

@@ -11,17 +11,23 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import uk.ac.tees.mad.d3834053.presentation.SplashDestination
 import uk.ac.tees.mad.d3834053.presentation.SplashScreen
 import uk.ac.tees.mad.d3834053.presentation.auth.login.LoginDestination
 import uk.ac.tees.mad.d3834053.presentation.auth.login.LoginScreen
+import uk.ac.tees.mad.d3834053.presentation.auth.login.LoginViewModel
 import uk.ac.tees.mad.d3834053.presentation.auth.registration.RegistrationDestination
 import uk.ac.tees.mad.d3834053.presentation.auth.registration.RegistrationScreen
+import uk.ac.tees.mad.d3834053.presentation.home.FavoriteDestination
+import uk.ac.tees.mad.d3834053.presentation.home.FavoriteScreen
 import uk.ac.tees.mad.d3834053.presentation.home.HomeDestination
 import uk.ac.tees.mad.d3834053.presentation.home.HomeScreen
 import uk.ac.tees.mad.d3834053.presentation.mapview.ShelterDestination
@@ -45,7 +51,7 @@ private fun isOnboardingFinished(context: Context): Boolean {
 fun PetAdoptionFinderNavigation() {
     val navController = rememberNavController()
     val context = LocalContext.current
-
+    val loginViewModel: LoginViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = SplashDestination.route) {
         composable(SplashDestination.route) {
@@ -64,22 +70,24 @@ fun PetAdoptionFinderNavigation() {
         }
         composable(HomeDestination.route) {
             HomeScreen(
-                onNavigateToLogin = {
-                    navController.navigate(route = LoginDestination.route)
-                },
                 onItemClick = {
-                    navController.navigate(PetDetailDestination.route)
+                    navController.navigate(PetDetailDestination.route + "/" + it)
                 },
                 navController = navController
             )
         }
         composable(LoginDestination.route) {
-            LoginScreen(onNavigateToRegistration = {
-                navController.navigate(route = RegistrationDestination.route)
-            }, onNavigateToForgotPassword = { }, onNavigateToAuthenticatedRoute = {
-                navController.navigate(route = HomeDestination.route)
+            LoginScreen(
+                loginViewModel = loginViewModel,
+                onNavigateToRegistration = {
+                    navController.navigate(route = RegistrationDestination.route)
+                },
+                onNavigateToForgotPassword = { },
+                onNavigateToAuthenticatedRoute = {
+                    navController.navigate(route = HomeDestination.route)
 
-            })
+                }
+            )
         }
         composable(RegistrationDestination.route) {
             RegistrationScreen(onNavigateBack = {
@@ -89,7 +97,13 @@ fun PetAdoptionFinderNavigation() {
                     navController.navigate(route = HomeDestination.route)
                 })
         }
-        composable(PetDetailDestination.route) {
+        composable(
+            route = PetDetailDestination.routeWithArg, arguments = listOf(
+                navArgument(PetDetailDestination.petIdArg) {
+                    type = NavType.StringType
+                }
+            )
+        ) {
             PetDetailScreen(
                 onNavigateBack = {
                     navController.navigateUp()
@@ -103,11 +117,22 @@ fun PetAdoptionFinderNavigation() {
         }
         composable(ProfileDestination.route) {
             ProfileScreen(
-                navController = navController
+                navController = navController,
+                onLogout = {
+                    loginViewModel.signOut()
+                    navController.navigate(LoginDestination.route)
+                }
             )
         }
         composable(EditProfileDestination.route) {
             EditProfile(onFinishEditing = { navController.navigateUp() })
+        }
+        composable(FavoriteDestination.route) {
+            FavoriteScreen(onBack = {
+                navController.navigateUp()
+            }, onItemClick = {
+                navController.navigate(PetDetailDestination.route + "/" + it)
+            })
         }
     }
 }

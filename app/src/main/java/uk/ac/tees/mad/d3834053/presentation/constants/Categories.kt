@@ -1,15 +1,17 @@
 package uk.ac.tees.mad.d3834053.presentation.constants
 
+import uk.ac.tees.mad.d3834053.database.FavoritePetEntity
+
 data class Categories(
     var iconRes: Int,
     var title: String
 )
 
 data class Items(
-    var id: Int,
-    var name: String,
-    var category: String,
-    var imageRes: Int,
+    var id: String = "",
+    var name: String = "",
+    var category: String = "",
+    var image: String = "",
     var sex: String = "Male",
     var age: Int = 2,
     var weight: Double = 2.5,
@@ -26,5 +28,9 @@ data class Items(
         val name: String,
         val phone: String,
         val email: String
+    )
+
+    fun toFavoriteEntity() = FavoritePetEntity(
+        petId = id
     )
 }
