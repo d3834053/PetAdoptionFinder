@@ -64,7 +64,6 @@ object LoginDestination : NavigationDestination {
 fun LoginScreen(
     loginViewModel: LoginViewModel,
     onNavigateToRegistration: () -> Unit,
-    onNavigateToForgotPassword: () -> Unit,
     onNavigateToAuthenticatedRoute: () -> Unit,
 ) {
     val user by remember { mutableStateOf(Firebase.auth.currentUser) }
@@ -100,24 +99,6 @@ fun LoginScreen(
         background(Color.White)
 
     }) {
-
-        Box(modifier = with(Modifier) {
-            fillMaxWidth()
-            background(Color.White)
-            align(Alignment.TopEnd)
-
-        }) {
-            Image(
-                modifier = Modifier
-                    .size(200.dp, 200.dp),
-                painter = painterResource(id = R.drawable.signup_background),
-                contentDescription = "",
-                contentScale = ContentScale.FillBounds,
-                alignment = Alignment.TopEnd
-            )
-        }
-
-
 
         Column(
             modifier = Modifier
@@ -163,8 +144,7 @@ fun LoginScreen(
                 },
                 onSubmit = {
                     loginViewModel.onUiEvent(loginUiEvent = LoginUiEvent.Submit)
-                },
-                onForgotPasswordClick = onNavigateToForgotPassword
+                }
             )
 
             Spacer(modifier = Modifier.size(0.dp, 30.dp))
@@ -206,59 +186,3 @@ fun LoginScreen(
         }
     }
 }
-
-//@Composable
-//fun rememberEmailandpassword(
-//    onAuthComplete: (AuthResult) -> Unit,
-//    onAuthError: (Exception) -> Unit,
-//): ManagedActivityResultLauncher<Intent, ActivityResult> {
-//    val scope = rememberCoroutineScope()
-//    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-//        try {
-//            val credential = EmailAuthProvider.getCredential(
-//                GlobalConstants.email_user?.email!!,
-//                GlobalConstants.email_user?.password!!
-//            )
-//            scope.launch {
-//                val result =
-//                    Firebase.auth.currentUser!!.linkWithCredential(credential).await()
-//                Log.d("GoogleAuth", "Signin Successful")
-//
-//                onAuthComplete(result)
-//            }
-//        } catch (e: Exception) {
-//            Log.d("GoogleAuth", e.toString())
-//            onAuthError(e)
-//        }
-//    }
-//
-//}
-
-@Composable
-fun rememberFirebaseAuthLauncher(
-    onAuthComplete: (AuthResult) -> Unit,
-    onAuthError: (ApiException) -> Unit,
-): ManagedActivityResultLauncher<Intent, ActivityResult> {
-    val scope = rememberCoroutineScope()
-    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)!!
-            Log.d("GoogleAuth", "account $account")
-            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-            scope.launch {
-                val authResult = Firebase.auth.signInWithCredential(credential).await()
-                onAuthComplete(authResult)
-            }
-        } catch (e: ApiException) {
-            Log.d("GoogleAuth", e.toString())
-            onAuthError(e)
-        }
-    }
-}
-
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewLoginScreen() {
-//    LoginScreen(onNavigateToRegistration = {}, onNavigateToForgotPassword = { }) {}
-//}

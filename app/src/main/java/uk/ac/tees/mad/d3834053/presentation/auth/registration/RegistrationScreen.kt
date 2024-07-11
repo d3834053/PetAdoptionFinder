@@ -93,21 +93,6 @@ fun RegistrationScreen(
                 color = Color.Black
             )
         }
-        Box(modifier = with(Modifier) {
-            fillMaxWidth()
-            background(Color.White)
-            align(Alignment.TopEnd)
-
-        }) {
-            Image(
-                modifier = Modifier
-                    .size(200.dp, 200.dp),
-                painter = painterResource(id = R.drawable.signup_background),
-                contentDescription = "",
-                contentScale = ContentScale.FillBounds,
-                alignment = Alignment.TopEnd
-            )
-        }
 
 
         Column(

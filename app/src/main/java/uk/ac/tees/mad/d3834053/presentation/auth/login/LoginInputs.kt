@@ -37,11 +37,7 @@ fun LoginInputs(
     onEmailOrMobileChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onSubmit: () -> Unit,
-    onForgotPasswordClick: () -> Unit,
 ) {
-    var checked = remember {
-        mutableStateOf(true)
-    }
     // Login Inputs Section
     Column(modifier = Modifier.fillMaxWidth()) {
 
@@ -52,7 +48,7 @@ fun LoginInputs(
                 .padding(top = 10.dp),
             value = loginState.emailOrMobile,
             onValueChange = onEmailOrMobileChange,
-            label = stringResource(id = R.string.login_email_id_or_phone_label),
+            label = stringResource(id = R.string.login_email_id),
             isError = loginState.errorState.emailOrMobileErrorState.hasError,
             errorText = stringResource(id = loginState.errorState.emailOrMobileErrorState.errorMessageStringResource)
         )
@@ -71,52 +67,6 @@ fun LoginInputs(
             imeAction = ImeAction.Done
         )
 
-        // Forgot Password
-        Row(
-            modifier = Modifier.fillMaxWidth(1f),
-            Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Absolute.Center
-            ) {
-                Switch(
-                    checked = checked.value, onCheckedChange = {
-                        checked.value = it
-                    }, colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color(0xFFF8D790),
-                        checkedTrackColor = Color(0xFFFFAE00),
-                        uncheckedThumbColor = Color.White,
-                        uncheckedTrackColor = Color.LightGray,
-                        uncheckedBorderColor = Color.LightGray
-                    )
-                )
-                Spacer(modifier = Modifier.size(10.dp))
-                Text(
-                    modifier = Modifier
-                        .padding(top = 5.dp),
-                    text = stringResource(id = R.string.remeber_me),
-                    color = Color(0xFF000000),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-            }
-
-            Text(
-                modifier = Modifier
-                    .padding(top = 5.dp)
-                    .clickable {
-                        onForgotPasswordClick.invoke()
-                    },
-                text = stringResource(id = R.string.forgot_password),
-                color = Color(0xFFFFAE00),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-        }
         Spacer(modifier = Modifier.height(10.dp))
         // Login Submit Button
 

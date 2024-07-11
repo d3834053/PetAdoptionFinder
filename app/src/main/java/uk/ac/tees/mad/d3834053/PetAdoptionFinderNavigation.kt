@@ -82,7 +82,6 @@ fun PetAdoptionFinderNavigation() {
                 onNavigateToRegistration = {
                     navController.navigate(route = RegistrationDestination.route)
                 },
-                onNavigateToForgotPassword = { },
                 onNavigateToAuthenticatedRoute = {
                     navController.navigate(route = HomeDestination.route)
 

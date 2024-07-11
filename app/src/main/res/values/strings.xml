@@ -5,7 +5,7 @@
     <!-- Login -->
     <string name="login_heading_text">LogIn</string>
     <string name="login_subheading_text">Welcome Back we missed you!</string>
-    <string name="login_email_id_or_phone_label">Email ID or Mobile Number</string>
+    <string name="login_email_id">Email ID</string>
     <string name="login_password_label">Password</string>
     <string name="login_button_text">Log In</string>
     <string name="forgot_password">Forgot Password?</string>
