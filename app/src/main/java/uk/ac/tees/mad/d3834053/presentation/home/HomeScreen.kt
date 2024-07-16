@@ -8,16 +8,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -87,7 +90,6 @@ fun HomeScreen(
         Categories(R.drawable.bird, "Bird"),
     )
 
-//FFA2A2A2
     Scaffold(
         bottomBar = {
             BottomNavBar(navController = navController)
@@ -107,6 +109,15 @@ fun HomeScreen(
                             tint = primaryYellow
                         )
                     }
+                },
+                navigationIcon = {
+                    IconButton(onClick = { }) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null,
+                            tint = primaryYellow
+                        )
+                    }
                 }
             )
         }
@@ -118,32 +129,6 @@ fun HomeScreen(
                 .background(Color.White)
         ) {
             Column {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(8.dp)
-                        .clip(shape = RoundedCornerShape(30.dp))
-                        .background(
-                            Color(
-                                0xFFCCCCCC
-                            )
-                        )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight(),
-                        horizontalArrangement = Arrangement.SpaceAround,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "Search Pets", style = MaterialTheme.typography.bodyMedium)
-                        Spacer(modifier = Modifier.size(20.dp))
-                        Icon(imageVector = Icons.Filled.Search, contentDescription = "Search Box")
-                    }
-                }
-
-                Spacer(modifier = Modifier.size(30.dp))
 
                 LazyRow(
                     modifier = Modifier
@@ -153,7 +138,8 @@ fun HomeScreen(
                 ) {
                     itemsIndexed(categories) { index, item ->
                         CategoryCard(modifier = Modifier
-                            .size(80.dp, 120.dp)
+                            .height(120.dp)
+                            .aspectRatio(1f)
                             .clip(RoundedCornerShape(16.dp))
                             .background(
                                 if (selectedItemIndex.intValue == index) Color(0xFFFFAE00)
@@ -166,8 +152,6 @@ fun HomeScreen(
                             .padding(horizontal = 12.dp, vertical = 6.dp), item = item)
                     }
                 }
-
-                Spacer(modifier = Modifier.size(30.dp))
 
                 LazyColumn {
                     items(petList) { item ->
@@ -199,10 +183,15 @@ fun CategoryCard(modifier: Modifier, item: Categories) {
         Column(
             modifier = Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(painter = painterResource(id = item.iconRes), contentDescription = item.title)
-            Spacer(modifier = Modifier.size(20.dp))
+            Image(
+                painter = painterResource(id = item.iconRes),
+                contentDescription = item.title,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .weight(1f)
+            )
             Text(
-                text = item.title, style = MaterialTheme.typography.bodyMedium, color = Color.Black
+                text = item.title, style = MaterialTheme.typography.titleMedium, color = Color.Black
             )
         }
     }
@@ -238,9 +227,13 @@ fun PetsCard(
         }
         IconButton(
             onClick = onFavoriteClick,
-            modifier = Modifier.align(
-                Alignment.TopEnd
-            ),
+            modifier = Modifier
+                .padding(6.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .align(
+                    Alignment.BottomEnd
+                )
+                .background(Color.White.copy(0.9f)),
         ) {
             Icon(
                 imageVector = if (favouritePet) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
