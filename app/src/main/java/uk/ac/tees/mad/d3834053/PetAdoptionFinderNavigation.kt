@@ -1,14 +1,21 @@
 package uk.ac.tees.mad.d3834053
 
 import android.content.Context
+import android.media.Image
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -139,21 +146,25 @@ fun PetAdoptionFinderNavigation() {
 
 sealed class BottomNavigationScreens(
     val route: String,
-    val selectedIcon: ImageVector
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector
 ) {
     object Home : BottomNavigationScreens(
         route = HomeDestination.route,
-        selectedIcon = Icons.Default.Home
+        selectedIcon = Icons.Default.Home,
+        unselectedIcon = Icons.Outlined.Home
     )
 
     object Shelter : BottomNavigationScreens(
         route = ShelterDestination.route,
-        selectedIcon = Icons.Default.LocationOn
+        selectedIcon = Icons.Default.LocationOn,
+        unselectedIcon = Icons.Outlined.LocationOn
     )
 
     object Profile : BottomNavigationScreens(
         route = ProfileDestination.route,
-        selectedIcon = Icons.Default.Person
+        selectedIcon = Icons.Default.Person,
+        unselectedIcon = Icons.Outlined.Person
     )
 }
 
@@ -169,7 +180,7 @@ fun BottomNavBar(
 ) {
 
     BottomAppBar(
-        containerColor = primaryYellow
+        containerColor = primaryYellow.copy(0.9f)
     ) {
 
         bottomNavigationItems.forEachIndexed { index, value ->
@@ -183,10 +194,15 @@ fun BottomNavBar(
                 },
                 icon = {
                     Icon(
-                        imageVector = value.selectedIcon,
+                        imageVector = if (selected) value.selectedIcon else value.unselectedIcon,
                         contentDescription = null
                     )
-                }
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = primaryYellow,
+                    unselectedIconColor = Color.Black,
+                    indicatorColor = Color.White
+                )
             )
         }
     }
