@@ -13,8 +13,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,11 +24,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -67,11 +71,10 @@ fun PetDetailScreen(
     val item by petDetailViewModel.pet.collectAsState()
     val screenHeight = LocalConfiguration.current.screenHeightDp
     val context = LocalContext.current
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
+    Column(
+        modifier = Modifier.fillMaxSize()
     ) {
-        Box(modifier = Modifier.height((screenHeight / 2).dp)) {
+        Box(modifier = Modifier.height(400.dp)) {
             if (item.image.isEmpty()) {
                 Image(
                     imageVector = Icons.Default.Image,
@@ -81,8 +84,7 @@ fun PetDetailScreen(
             } else {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current).crossfade(true)
-                        .data(item.image)
-                        .build(),
+                        .data(item.image).build(),
                     contentDescription = null,
                     modifier = Modifier.fillMaxWidth(),
                     contentScale = ContentScale.Crop
@@ -90,8 +92,7 @@ fun PetDetailScreen(
             }
             IconButton(
                 onClick = onNavigateBack,
-                modifier = Modifier
-                    .padding(16.dp),
+                modifier = Modifier.padding(16.dp),
                 colors = IconButtonDefaults.iconButtonColors(Color.White.copy(0.7f))
             ) {
                 Icon(
@@ -106,7 +107,6 @@ fun PetDetailScreen(
             Modifier
                 .fillMaxWidth()
                 .background(Color.White)
-                .align(Alignment.BottomCenter)
                 .padding(24.dp)
 
         ) {
@@ -114,6 +114,9 @@ fun PetDetailScreen(
             Row(
                 Modifier
                     .fillMaxWidth()
+                    .height(IntrinsicSize.Max)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(primaryYellow.copy(0.3f))
                     .padding(vertical = 16.dp),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
@@ -121,31 +124,37 @@ fun PetDetailScreen(
                     Text(text = "Sex", fontSize = 16.sp)
                     Text(text = item.sex, fontSize = 20.sp, fontWeight = FontWeight.Medium)
                 }
+                Spacer(
+                    modifier = Modifier
+                        .background(Color.White)
+                        .width(2.dp)
+                        .fillMaxHeight()
+                )
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(text = "Age", fontSize = 16.sp)
                     Text(
-                        text = "${item.age} years",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Medium
+                        text = "${item.age} years", fontSize = 20.sp, fontWeight = FontWeight.Medium
                     )
                 }
+                Spacer(
+                    modifier = Modifier
+                        .background(Color.White)
+                        .width(2.dp)
+                        .fillMaxHeight()
+                )
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(text = "Weight", fontSize = 16.sp)
                     Text(
-                        text = "${item.weight} kg",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Medium
+                        text = "${item.weight} kg", fontSize = 20.sp, fontWeight = FontWeight.Medium
                     )
                 }
             }
             Spacer(modifier = Modifier.height(20.dp))
             Column {
                 Text(text = item.name, fontWeight = FontWeight.SemiBold, fontSize = 24.sp)
-                Spacer(modifier = Modifier.height(24.dp))
-                Row(
+                Spacer(modifier = Modifier.height(12.dp))
+                Column(
                     Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row {
                         Icon(
@@ -155,16 +164,25 @@ fun PetDetailScreen(
                         )
                         Text(text = item.address)
                     }
-                    Text(text = item.dob)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row {
+                        Icon(
+                            imageVector = Icons.Rounded.DateRange,
+                            contentDescription = null,
+                            tint = primaryYellow
+                        )
+                        Text(text = item.dob)
+                    }
                 }
-                Row(Modifier.padding(vertical = 12.dp)) {
-                    Text(text = item.description)
-                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(text = "Description", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = item.description)
+                Spacer(modifier = Modifier.height(12.dp))
+
                 Column {
                     Text(
-                        text = "Contact person",
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 18.sp
+                        text = "Contact person", fontWeight = FontWeight.Medium, fontSize = 18.sp
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(
@@ -201,16 +219,13 @@ fun PetDetailScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(60.dp)
-                                    .clip(CircleShape)
-                                    .clickable {
-                                        context.dial(item.contactPerson.phone)
-                                    }
-                                    .background(Color.Blue),
-                                contentAlignment = Alignment.Center
-                            ) {
+                            Box(modifier = Modifier
+                                .size(60.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    context.dial(item.contactPerson.phone)
+                                }
+                                .background(Color.Blue), contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.Call,
                                     contentDescription = null,
@@ -224,11 +239,9 @@ fun PetDetailScreen(
                                     .background(primaryYellow)
                                     .clickable {
                                         context.sendMail(
-                                            item.contactPerson.email,
-                                            "Want to pet ${item.name}"
+                                            item.contactPerson.email, "Want to pet ${item.name}"
                                         )
-                                    },
-                                contentAlignment = Alignment.Center
+                                    }, contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.Chat,
