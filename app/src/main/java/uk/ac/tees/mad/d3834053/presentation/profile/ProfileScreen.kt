@@ -14,10 +14,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -93,31 +99,49 @@ fun ProfileScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Box(
-                        Modifier
-                            .clip(CircleShape)
-                            .border(1.dp, Color.Black, CircleShape)
-                            .size(100.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (userProfileState.image.isNullOrEmpty()) {
-                            Image(
-                                imageVector = Icons.Default.Image,
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Button(
+                            onClick = { navController.navigate(EditProfileDestination.route) },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(horizontal = 12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
                                 contentDescription = null,
-                                modifier = Modifier
-                                    .size(100.dp)
-                                    .padding(12.dp)
-                                    .clip(CircleShape)
+                                modifier = Modifier.size(16.dp)
                             )
-                        } else {
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current).crossfade(true)
-                                    .data(userProfileState.image)
-                                    .build(),
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxWidth(),
-                                contentScale = ContentScale.Crop
-                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(text = "Edit")
+                        }
+                        Box(
+                            Modifier
+                                .align(Alignment.Center)
+                                .clip(CircleShape)
+                                .border(1.dp, Color.Black, CircleShape)
+                                .size(100.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (userProfileState.image.isNullOrEmpty()) {
+                                Image(
+                                    imageVector = Icons.Default.Image,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .padding(12.dp)
+                                        .clip(CircleShape)
+                                )
+                            } else {
+                                AsyncImage(
+                                    model = ImageRequest.Builder(LocalContext.current)
+                                        .crossfade(true)
+                                        .data(userProfileState.image)
+                                        .build(),
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -127,47 +151,20 @@ fun ProfileScreen(
                         fontSize = 24.sp
                     )
                     Firebase.auth.currentUser?.email?.let { Text(text = it) }
-
-                    Column(
-                        Modifier
+                    Text(
+                        text = userProfileState.address,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Button(
+                        onClick = onLogout,
+                        modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                            .padding(16.dp)
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
                     ) {
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    navController.navigate(EditProfileDestination.route)
-                                }
-                        ) {
-                            Text(
-                                text = "Edit profile",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier
-                                    .padding(12.dp)
-                            )
-                        }
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    Firebase.auth.signOut()
-                                    navController.navigate(LoginDestination.route)
-                                }
-                        ) {
-                            Text(
-                                text = "Log out",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier
-                                    .padding(12.dp)
-                                    .clickable {
-                                        onLogout.invoke()
-                                    }
-                            )
-                        }
+                        Text(text = "Logout")
                     }
                 }
             }

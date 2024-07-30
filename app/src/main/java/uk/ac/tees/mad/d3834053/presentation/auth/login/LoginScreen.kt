@@ -66,7 +66,6 @@ fun LoginScreen(
     onNavigateToRegistration: () -> Unit,
     onNavigateToAuthenticatedRoute: () -> Unit,
 ) {
-    val user by remember { mutableStateOf(Firebase.auth.currentUser) }
     val loginState =
         loginViewModel.loginState.collectAsState()
 
@@ -82,10 +81,13 @@ fun LoginScreen(
 //    val token = stringResource(id = R.string.your_web_client_id)
     val context = LocalContext.current
     GlobalConstants.context = context
-    //to check user is already login or not.
-    loginViewModel.checkUser(user)
+
 
     LaunchedEffect(loginState.value) {
+        val user = Firebase.auth.currentUser
+
+        //to check user is already login or not.
+        loginViewModel.checkUser(user)
         println("LaunchedEffect triggered with login success: ${loginState.value}")
         if (loginState.value.isLoginSuccessful) {
             println("Navigating to authenticated route")

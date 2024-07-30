@@ -99,6 +99,7 @@ class ProfileViewModel @Inject constructor() : ViewModel() {
                                     "Profile Updated Successfully",
                                     Toast.LENGTH_SHORT
                                 ).show()
+                                fetchUserDetails()
                             }
                         }.addOnFailureListener {
                             Toast.makeText(context, "Update Failed", Toast.LENGTH_SHORT).show()
